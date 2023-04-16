@@ -25,9 +25,6 @@ urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 knitr::opts_chunk$set(echo = FALSE, results = "hide", warning = FALSE, message = FALSE, fig.width=8, fig.height=4)
 options(scipen = 0, digits = 3) 
 if(!require('pacman')) {install.packages('pacman')}
@@ -381,7 +378,7 @@ write.csv(data_final, file = "finaldataset.csv", row.names = FALSE)
 ```
 
 ```{r load final dataset}
-diabetes <- read.csv("data/finaldataset.csv")
+diabetes <- read.csv("finaldataset.csv")
 ```
 # Executive Summary
 
@@ -530,6 +527,7 @@ table1
 
 # Conclusion
 
+
 # References
 1. Centers for Disease Control and Prevention. National Diabetes Statistics Report website. https://www.cdc.gov/diabetes/data/statistics-report/index.html. Accessed April 16, 2023.
 2. Centers for Disease Control and Prevention. Prevent Diabetes Complications. https://www.cdc.gov/diabetes/managing/problems.html. Accessed April 16, 2023.
@@ -539,24 +537,3 @@ table1
 6. Harris MI and Eastman RC (2000), Early detection of undiagnosed diabetes mellitus: a US perspective. Diabetes Metab. Res. Rev., 16: 230-236.
 7. Kiefer MM, Silverman JB, Young BA, Nelson KM. National patterns in diabetes screening: data from the National Health and Nutrition Examination Survey (NHANES) 2005-2012. J Gen Intern Med. 2015 May;30(5):612-8. doi: 10.1007/s11606-014-3147-8. Epub 2014 Dec 23.
 8. Le Bonniec A, Sun S, Andrin A, et al. Barriers and Facilitators to Participation in Health Screening: an Umbrella Review Across Conditions. Prev Sci 23, 1115–1142 (2022). 
-=======
-=======
->>>>>>> 98d9348608987e7f6c813bf757c5d3113c3fcc93
-=======
->>>>>>> 1ec48e9887b880eab08e06721c3118a1960fe03c
-knitr::opts_chunk$set(echo = FALSE, results = "hide", fig.width=8, fig.height=4)
-options(scipen = 0, digits = 3) 
-if(!require('pacman')) {install.packages('pacman')}
-pacman::p_load(bestglm, glmnet, leaps, car, tidyverse, pROC, caret)
-```
-
-# Background
-
-
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 98d9348608987e7f6c813bf757c5d3113c3fcc93
-=======
->>>>>>> 98d9348608987e7f6c813bf757c5d3113c3fcc93
-=======
->>>>>>> 1ec48e9887b880eab08e06721c3118a1960fe03c
