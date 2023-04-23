@@ -379,6 +379,9 @@ write.csv(data_final, file = "finaldataset.csv", row.names = FALSE)
 
 ```{r load final dataset}
 diabetes <- read.csv("finaldataset.csv")
+
+diabetes <- diabetes %>% mutate(across(3:4, as.factor)) %>% mutate(across(7:26, as.factor)) %>% mutate(across(28:41, as.factor)) %>% mutate(across(50:57, as.factor))
+diabetes$DIABETESYN <- as.factor(diabetes$DIABETESYN)
 ```
 # Executive Summary
 
@@ -392,7 +395,7 @@ In this study, we sought to use existing health survey data from the CDC's Behav
 ## Data Cleaning
 Data for this project was obtained from the CDC's 2019 BRFSS. The BRFSS is a national telephone-based survey which is conducted in all 50 states plus Puerto Rico and Guam, and collects information from US adults regarding health risk factors, medical conditions, and use of preventive services. For this project, we elected to use data from the 2019 survey given concern that the wide-reaching impact of the COVID-19 pandemic on health and socioeconomic factors would influence the analysis. 
 
-The complete 2019 BRFSS file was downloaded from the CDC's website. The original file included 342 variables and 418,268 observations. First, we selected variables which could plausibly be used to predict the presence of diabetes. We then eliminated responses from individuals living in Puerto Rico or Guam to limit our analysis to US states only. Categorical variables were re-coded from numeric to character for ease of interpretation. The BRFSS survey includes many questions with skip logic; for example, if a respondent reports being of the male sex, they will not be asked about Pap smear or mammography history. Within the dataset, these values as coded as missing; we therefore generated new variables which included "not applicable" as an option to distinguish these values from true missing values. Finally, we generated a new variable for drink of alcohol per month based on respondents' stated drinking instances per week/month and average number of drinks per instance.
+The complete 2019 BRFSS file was downloaded from the CDC's website. The original file included 342 variables and 418,268 observations. First, we selected variables which could plausibly be used to predict the presence of diabetes. We then eliminated responses from individuals living in Puerto Rico or Guam to limit our analysis to US states only. Categorical variables were re-coded from numeric to character for ease of interpretation. The BRFSS survey includes many questions with skip logic; for example, if a respondent reports being of the male sex, they will not be asked about Pap smear or mammography history. Within the dataset, these values as coded as missing; we therefore generated new variables which included "not applicable" as an option to distinguish these values from true missing values. Finally, we generated a new variable for drinks of alcohol per month based on respondents' stated drinking instances per week/month and average number of drinks per instance.
 
 Because different survey modules are used in different states, some variables exhibited a high rate of missingness. For example, as can be seen in **Figure 1**, greater than 90% of participants are missing responses for questions relating to skin cancer risk, food stamp use, and diagnosis with hepatitis B or C. 
 <center>
