@@ -614,7 +614,7 @@ The interactive treemap in **Figure 5** shows the relative number of respondents
 edudata <- diabetes %>%
   mutate(EMPLOY2 = ifelse(EMPLOY=="Unable to work" | EMPLOY=="Unemployed 1 year or more" | EMPLOY=="Unemployed less than 1 year", "Unemployed", EMPLOY), HOME2 = ifelse(HOME=="Other" | HOME=="Not sure", "Other", HOME), EDU2 = ifelse(EDU=="Elementary" | EDU=="None" | EDU=="Some high school", "Less than high school", EDU)) %>%
   group_by(EDU2, EMPLOY2, HOME2) %>%
-  summarise(total=n(),.groups = 'drop') %>%
+  dplyr::summarise(total=n(),.groups = 'drop') %>%
   ungroup()
 figure5 <- treemap(edudata, index=c("EDU2", "EMPLOY2", "HOME2"), vSize = "total", type = "index", palette="YlGnBu")
 figure5_inter <- d3tree2(figure5,  rootname = "Education Level" )
@@ -627,7 +627,7 @@ figure5_inter
 
 Finally, we examine the distribution of characteristics by presence of diabetes, the outcome that we aim to predict (**Table 1**). Many of the selected variables are significantly different at the 0.05 level between the diabetic and non-diabetic groups. Individuals with diabetes are more likely to be Black or Hispanic, unemployed/unable to work, attain lower levels of education, have other co-morbid conditions such as high blood pressure and obesity, and eat fewer servings of fruits and vegetables.
 ```{r table 1, results='markup'}
-Function to perform t-tests and chi-square tests for Table 1 variables
+#Function to perform t-tests and chi-square tests for Table 1 variables
 pvalue <- function(x, ...) {
     # Construct vectors of data y, and groups (strata) g
     y <- unlist(x)
