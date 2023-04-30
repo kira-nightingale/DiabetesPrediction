@@ -700,13 +700,6 @@ fit.lambda <- cv.glmnet(X, as.numeric(Y), alpha=1, nfolds=10)
 fit.lambda$lambda.min
 fit.lambda$lambda.1se
 
-plot(fit.lambda)
-plot(fit.lambda$lambda, 
-     main = "There are 80 lambda used", 
-     xlab = "Lambda Index", 
-     ylab = "Lambda Value",
-     type = "l") 
-
 coef.1se <- coef(fit.lambda, s="lambda.1se")
 coef.1se <- coef.1se[which(coef.1se !=0),]  
 var.1se <- rownames(as.matrix(coef.1se))[-1]
@@ -716,6 +709,15 @@ data_lasso_sub <- data_lasso[,c("DIABETESYN", "SEX", "BADPHYSDAYS", "PERSDOC", "
 dim(data_lasso_sub)
 ```
 
+```{r plots, echo=FALSE}
+plot(fit.lambda)
+plot(fit.lambda$lambda, 
+     main = "There are 80 lambda used", 
+     xlab = "Lambda Index", 
+     ylab = "Lambda Value",
+     type = "l") 
+```
+  
 ```{r fit.final lasso model, echo=FALSE,results='hide',message=FALSE}
 fit.final <- lm(DIABETESYN ~., data=data_lasso_sub)
 summary(fit.final)
@@ -739,7 +741,7 @@ fit.final.reduced2 <- lm(DIABETESYN ~., data = data_lasso_sub2)
 summary(fit.final.reduced2)
 ```
 
-```{r assumptions, echo=FALSE,results='hide',message=FALSE}
+```{r assumptions, echo=FALSE,message=FALSE}
 par(mfrow=c(1,2))
 plot(fit.final.reduced1, 1)
 plot(fit.final.reduced1, 2)
@@ -764,6 +766,13 @@ data_rf <- data_rf %>%
 fit.tree <- tree(DIABETESYN~., data_rf, control=tree.control(nrow(data_rf), mindev = 0.005))
 plot(fit.tree) 
 text(fit.tree, pretty=TRUE) 
+```
+
+```{r plots, echo=FALSE}
+plot(fit.tree) 
+text(fit.tree, pretty=TRUE)  
+
+roc(data_rf$DIABETESYN, prob.1, plot=T) 
 ```
 
 
