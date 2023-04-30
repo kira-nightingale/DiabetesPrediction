@@ -28,8 +28,7 @@ urlcolor: blue
 knitr::opts_chunk$set(echo = FALSE, results = "hide", warning = FALSE, message = FALSE, fig.width=8, fig.height=4)
 options(scipen = 0, digits = 3) 
 if(!require('pacman')) {install.packages('pacman')}
-pacman::p_load(bestglm, glmnet, leaps, car, tidyverse, pROC, caret, haven, lfactors, readxl, collapse, mice, skimr, naniar, ggpubr, RColorBrewer, usmap, table1, treemap, d3treeR, dplyr, ggbiplot, purrr)
-
+pacman::p_load(bestglm, glmnet, leaps, car, tidyverse, pROC, caret, haven, lfactors, readxl, collapse, mice, skimr, naniar, ggpubr, RColorBrewer, usmap, table1, treemap, d3treeR, dplyr, ggbiplot, purrr, tree, rpart, randomForest, ranger, rattle, partykit, ggplot2,lda, data.table, ISLR)
 ```
 
 ```{r load and clean data, eval=FALSE}
@@ -748,6 +747,23 @@ plot(fit.final.reduced1, 2)
 par(mfrow=c(1,2))
 plot(fit.final.reduced2, 1)
 plot(fit.final.reduced2, 2)
+```
+
+## Random Forest
+
+We want to build a classification tree using the 6 predictors in our second lasso reduced model. First, we converted all of the characters to factors.
+
+```{r select variables for random forest, echo=FALSE,results='hide',message=FALSE}
+data_rf <- subset(diabetes, select = c("DIABETESYN", "BPHIGH", "HIGHCHOL", "KIDNEY", "BMICAT", "WALKDIFF", "PNEUVAC"))
+str(data_rf)
+data_rf <- data_rf %>%
+  mutate_if(is.character, as.factor)
+```
+
+```{r fit1 all predictors, echo=FALSE,results='hide',message=FALSE}
+fit.tree <- tree(DIABETESYN~., data_rf, control=tree.control(nrow(data_rf), mindev = 0.005))
+plot(fit.tree) 
+text(fit.tree, pretty=TRUE) 
 ```
 
 
