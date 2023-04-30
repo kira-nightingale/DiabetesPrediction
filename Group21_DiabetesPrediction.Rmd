@@ -751,28 +751,61 @@ plot(fit.final.reduced2, 1)
 plot(fit.final.reduced2, 2)
 ```
 
-## Random Forest
-
-We want to build a classification tree using the 6 predictors in our second lasso reduced model. First, we converted all of the characters to factors.
+We want to build a classification tree using the 6 predictors in our second lasso reduced model. First, we converted all of the characters to factors. We then built a single classification tree and measured its performance through the ROC curve. It has an AUC of 0.761, indicating a fairly good performance. Next, we built our random forest using `mtry=sqrt(6)=approximately 2` and `ntree=500`, and the graph showing the mis-classification rates of OOB (black), misclassification errors for "0" (red) and "1" (green) of OOB also indicate a good performance. To get a prediction for the training dataset using a random forest, we split our data in a 80/20 split for training and testing datasets. As seen from the ROC curve for the random forest, the AUC is 0.609, which is not as good as the single classification, but it also makes sense because the single tree can easily overfit the data. Our testing error is 0.141, also indicating that our random forest did not perform too badly.
 
 ```{r select variables for random forest, echo=FALSE,results='hide',message=FALSE}
 data_rf <- subset(diabetes, select = c("DIABETESYN", "BPHIGH", "HIGHCHOL", "KIDNEY", "BMICAT", "WALKDIFF", "PNEUVAC"))
 str(data_rf)
 data_rf <- data_rf %>%
   mutate_if(is.character, as.factor)
+summary(data_rf)
 ```
 
 ```{r fit1 all predictors, echo=FALSE,results='hide',message=FALSE}
 fit.tree <- tree(DIABETESYN~., data_rf, control=tree.control(nrow(data_rf), mindev = 0.005))
 plot(fit.tree) 
-text(fit.tree, pretty=TRUE) 
+text(fit.tree, pretty=TRUE)  
+
+predict(fit.tree, data_rf)[1:20, ] 
+prob.1 <- predict(fit.tree, data_rf)[, 2] 
+roc(data_rf$DIABETESYN, prob.1, plot=T) 
 ```
 
 ```{r plots, echo=FALSE}
 plot(fit.tree) 
 text(fit.tree, pretty=TRUE)  
 
-roc(data_rf$DIABETESYN, prob.1, plot=T) 
+roc(data_rf$DIABETESYN, prob.1, plot=T, main="ROC curve for single classification tree") 
+```
+
+```{r randomForest plot, echo=FALSE}
+set.seed(1)
+fit.rf <- randomForest(DIABETESYN~., data_rf, mtry=2, ntree=500)  
+
+plot(fit.rf) 
+legend("topright", colnames(fit.rf$err.rate), col=1:3, cex=0.8, fill=1:3)
+```
+
+```{r training/testing split, echo=FALSE, results='hide', message=FALSE}
+n <- nrow(data_rf)
+n1 <- (4/5)*n
+train.index <- sample(n, n1, replace=FALSE)
+length(train.index)
+data.train <- data_rf[train.index, ]
+data.test <- data_rf[-train.index, ]
+```
+
+```{r prediction, echo=FALSE}
+fit.rf.train <- randomForest(DIABETESYN~., data.train)
+plot(fit.rf.train)
+legend("topright", colnames(fit.rf.train$err.rate), col = 1:3, cex=0.8, fill=1:3)
+```
+
+```{r testing error and AUC, echo=FALSE}
+predict.rf.y <- predict(fit.rf.train, newdata=data.test)
+predict.rf <- predict(fit.rf.train, newdata=data.test, type="prob") 
+rf.test.err <- mean(data.test$DIABETESYN != predict.rf.y) 
+roc(data.test$DIABETESYN, predict.rf[,2], plot=TRUE, main="ROC curve for random forest")
 ```
 
 
