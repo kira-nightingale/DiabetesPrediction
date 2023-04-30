@@ -738,6 +738,17 @@ summary(fit.final.reduced1)
 
 fit.final.reduced2 <- lm(DIABETESYN ~., data = data_lasso_sub2)
 summary(fit.final.reduced2)
+```
+
+```{r assumptions, echo=FALSE,results='hide',message=FALSE}
+par(mfrow=c(1,2))
+plot(fit.final.reduced1, 1)
+plot(fit.final.reduced1, 2)
+
+par(mfrow=c(1,2))
+plot(fit.final.reduced2, 1)
+plot(fit.final.reduced2, 2)
+```
 
 
 # Conclusion
