@@ -666,6 +666,78 @@ data.frame(x = pca_all$x[,1],
   xlab("PC1") +
   ylab("PC2") 
 ```
+## LASSO
+
+We chose 55 variables from the full data, and we want to find the most important factors that relate to `DIABETESYN` and build a best possible linear prediction equation to predict `DIABETESYN`. Since most variables are factors, we created dummy variables for each level so that we now have 116 variables. We first ran a linear model with all of the variables, and we can see that we cannot estimate all the coefficients as variables such as `ARTHLIMITNo arthritis` and `ARTHWORKNo arthritis` have `NA` as their coefficient. Using `lambda.1se`, we narrowed down the numbder of predictors to 50. We then used backward selection to narrow down the numbder of predictors even further to 12, and narrowed down again to 6. In the first reduced lasso model, the 12 most significant predictors for `DIABETESYN` are: "SEX", "BADPHYSDAYS", "CHECKUP", "BPHIGH", "HIGHCHOL", "CHDMI", "KIDNEY", "BMICAT", "WALKDIFF", "ESTVO2MAX", "PNEUVAC", "RACE". In the second reduced lasso model, the 6 most significant predictors for `DIABETESYN` are: "BPHIGH", "HIGHCHOL", "KIDNEY", "BMICAT", "WALKDIFF", "PNEUVAC". In total, we have four regression models using `DIABETESYN` as the response variable. However, it is worth to note that the final two lasso models do not meet the linear model assumptions with their residual plots, which is likely due to most of the variables being categorical variables.
+
+```{r select variables for lasso, echo=FALSE,results='hide',message=FALSE}
+data_lasso <-  subset(diabetes, select = -c(ADULTS, state_abbr))
+ncol(data_lasso)
+names(data_lasso)
+dim(data_lasso) # 253684 observations, 55 predictors
+str(data_lasso)
+summary(data_lasso)
+data_lasso <- data_lasso %>%
+  mutate_if(is.factor, as.character)
+```
+
+```{r fit1 all variables, echo=FALSE,results='hide',message=FALSE}
+fit1 <- lm(DIABETESYN~., data_lasso)
+summary(fit1)
+```
+
+```{r, prepare variables, echo=FALSE,results='hide',message=FALSE}
+dim(data_lasso)
+Y <- as.matrix(data_lasso[, 1])
+X <- model.matrix(DIABETESYN~., data=data_lasso)[, -1]
+dim(X)
+dim(Y)
+colnames(X)
+```
+
+```{r fit.lambda, echo=FALSE,results='hide',message=FALSE}
+set.seed(1)
+fit.lambda <- cv.glmnet(X, as.numeric(Y), alpha=1, nfolds=10) 
+fit.lambda$lambda.min
+fit.lambda$lambda.1se
+
+plot(fit.lambda)
+plot(fit.lambda$lambda, 
+     main = "There are 80 lambda used", 
+     xlab = "Lambda Index", 
+     ylab = "Lambda Value",
+     type = "l") 
+
+coef.1se <- coef(fit.lambda, s="lambda.1se")
+coef.1se <- coef.1se[which(coef.1se !=0),]  
+var.1se <- rownames(as.matrix(coef.1se))[-1]
+var.1se
+names(data_lasso)
+data_lasso_sub <- data_lasso[,c("DIABETESYN", "SEX", "BADPHYSDAYS", "PERSDOC", "CHECKUP", "BPHIGH", "HIGHCHOL", "CHDMI", "STROKE", "SKINCANCER", "KIDNEY", "ARTHRITIS", "ARTHLIMIT", "ARTHWORK", "EDU", "HOME", "EMPLOY", "CHILD", "INCOME", "BMICAT", "DEAFNESS", "BLINDNESS", "WALKDIFF", "SMOKE", "BINGEALC", "HEAVYALC", "EXERCISE", "WRKOUTGUIDELINE", "ESTVO2MAX", "DAILYFTJUICE", "DAILYPOTATO", "FLUSHOT", "TETANUS", "PNEUVAC", "HIVTEST", "RACE", "DRNKPERMONTH")]
+dim(data_lasso_sub)
+```
+
+```{r fit.final lasso model, echo=FALSE,results='hide',message=FALSE}
+fit.final <- lm(DIABETESYN ~., data=data_lasso_sub)
+summary(fit.final)
+fit.final.1 <- regsubsets(DIABETESYN ~., nvmax = 30, method = "backward", data_lasso_sub)
+plot(summary(fit.final.1)$cp)  
+
+fit.final.1.s <- summary(fit.final.1)
+opt.size1 <- 12
+opt.size2 <- 6
+final.var1 <- colnames(fit.final.1.s$which)[fit.final.1.s$which[opt.size1, ]][-1]
+final.var2 <- colnames(fit.final.1.s$which)[fit.final.1.s$which[opt.size2, ]][-1]
+
+data_lasso_sub1 <- data_lasso[,c("DIABETESYN", "SEX", "BADPHYSDAYS", "CHECKUP", "BPHIGH", "HIGHCHOL", "CHDMI", "KIDNEY", "BMICAT", "WALKDIFF", "ESTVO2MAX", "PNEUVAC", "RACE")]
+
+data_lasso_sub2 <- data_lasso[,c("DIABETESYN", "BPHIGH", "HIGHCHOL", "KIDNEY", "BMICAT", "WALKDIFF", "PNEUVAC")]
+
+fit.final.reduced1 <- lm(DIABETESYN ~., data = data_lasso_sub1)
+summary(fit.final.reduced1)
+
+fit.final.reduced2 <- lm(DIABETESYN ~., data = data_lasso_sub2)
+summary(fit.final.reduced2)
 
 
 # Conclusion
