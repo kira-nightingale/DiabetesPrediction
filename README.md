@@ -7,4 +7,7 @@ The following documents are contained in this repository:
 1. README.md - this Read Me document
 2. Group21_DiabetesPrediction.Rmd - The R Markdown file
 3. Group21_DiabetesPrediction.html - The knitted document
-4-7. figure1-4.png - Figures included in the descriptive statistics portion of the write-up.
+4. figure1.png - Figure 1
+5. figure2.png - Figure 2
+6. figure3.png - Figure 3
+7. figure4.png - Figure 4
