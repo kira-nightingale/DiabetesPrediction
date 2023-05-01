@@ -28,7 +28,7 @@ urlcolor: blue
 knitr::opts_chunk$set(echo = FALSE, results = "hide", warning = FALSE, message = FALSE, fig.width=8, fig.height=4)
 options(scipen = 0, digits = 3) 
 if(!require('pacman')) {install.packages('pacman')}
-pacman::p_load(bestglm, glmnet, leaps, car, tidyverse, pROC, caret, haven, lfactors, readxl, collapse, mice, skimr, naniar, ggpubr, RColorBrewer, usmap, table1, treemap, d3treeR, dplyr, ggbiplot, purrr, tree, rpart, randomForest, ranger, rattle, partykit, ggplot2,lda, data.table, ISLR, keras, neuralnet)
+pacman::p_load(bestglm, glmnet, leaps, car, tidyverse, pROC, caret, haven, lfactors, readxl, collapse, mice, skimr, naniar, ggpubr, RColorBrewer, usmap, table1, treemap, d3treeR, dplyr, ggbiplot, purrr, tree, rpart, randomForest, ranger, rattle, partykit, ggplot2,lda, data.table, ISLR, keras, neuralnet, tensorflow)
 ```
 
 ```{r load and clean data, eval=FALSE}
@@ -384,7 +384,11 @@ diabetes$DIABETESYN <- as.factor(diabetes$DIABETESYN)
 
 ```
 # Executive Summary
+There are approximately 37.3 million individuals in the US living with diabetes, which represents 11.3% of the population. It is estimated that around 8.5 million of these individuals remain undiagnosed, meaning that 23% of adults living with diabetes are unaware of their health status (1). Diabetes is associated with significant morbidity and mortality, with diabetic individuals at risk of additional health conditions including chronic kidney disease, heart disease, nerve damage, vision loss, and difficulties with wound healing (2). Studies have estimated that diabetes may be present in an individual 4-7 years before the onset of clinical signs, highlighting the importance of routine screening even when patients remain asymptomatic (3-5). This is especially important given that clinical outcomes are improved with early intervention (6). Unfortunately, a high proportion of US adults do not attend routine health screenings, with one study finding that only 46.2% of individuals who met American Diabetes Association screening criteria had received diabetes screening (7). Prior studies have identified numerous barriers to health screenings, including lack of knowledge of the condition, fear, and lack of access to screening services (8). It could therefore be beneficial to create a non-invasive, survey-based questionnaire that can be completed by a patient at home which would identify their likelihood of having diabetes. Such a tool could eliminate some barriers to screening access by improving convenience as well as eliminate some of the fear associated with attending screening procedures in a clinical setting. Individuals who are likely to have diabetes based on the survey results would be prompted to receive screening and provided with resources and information to help encourage completion of screening. 
 
+In this study, we sought to use existing health survey data from the CDC's Behavioral Risk Factor Surveillance System (BRFSS) to create a model which would predict whether an individual has diabetes with a high level of accuracy. The BRFSS is a national telephone-based survey collected in all states and US territories. We selected the 2019 dataset as it was the most recent pre-pandemic. The original file included 342 variables and 418,268 observations.After data cleaning, including generation of new variables, removal of variables with a high proportion of missingness, and single imputation for variables with a small amount of missingness. The final analytic dataset included 253,684 observations and 58 variables. The data was examined descriptively, and principal component analysis was performed. For the predictive model, we generated models using LASSO, neural network, random forest, and ensemble methods. The models were compared using misclassification error as an assessment criteria, and the ensemble model was selected as the best model with a misclassification error of only 12.3%.
+
+In this project, we were able to successfully create a model which predicts a person's likelihood of having diabetes with a relatively small misclassification error. A model such as this could be used as a low-intensity and low-stress preliminary screener for patients who might be concerned about their diabetes risk but who, for whatever reason, are hesitant to receive clinical testing. Ideally, individuals who are flagged as having a high likelihood of diabetes could be presented with resources and encouraged to attend in-person testing for confirmation. Although a model such as this shows promise, it is subject to limitations including potential issues with the underlying dataset (missing data, self-report bias, and social desirability bias) as well as imperfect prediction. Further projects should focus on tuning the cut-off threshold, balancing the health risk associated with false negatives with the mental harm associated with false positives.
 
 # Background
 There are approximately 37.3 million individuals in the US living with diabetes, which represents 11.3% of the population. It is estimated that around 8.5 million of these individuals remain undiagnosed, meaning that 23% of adults living with diabetes are unaware of their health status (1). Diabetes is associated with significant morbidity and mortality, with diabetic individuals at risk of additional health conditions including chronic kidney disease, heart disease, nerve damage, vision loss, and difficulties with wound healing (2). Studies have estimated that diabetes may be present in an individual 4-7 years before the onset of clinical signs, highlighting the importance of routine screening even when patients remain asymptomatic (3-5). This is especially important given that clinical outcomes are improved with early intervention (6). Unfortunately, a high proportion of US adults do not attend routine health screenings, with one study finding that only 46.2% of individuals who met American Diabetes Association screening criteria had received diabetes screening (7). Prior studies have identified numerous barriers to health screenings, including lack of knowledge of the condition, fear, and lack of access to screening services (8). It could therefore be beneficial to create a non-invasive, survey-based questionnaire that can be completed by a patient at home which would identify their likelihood of having diabetes. Such a tool could eliminate some barriers to screening access by improving convenience as well as eliminate some of the fear associated with attending screening procedures in a clinical setting. Individuals who are likely to have diabetes based on the survey results would be prompted to receive screening and provided with resources and information to help encourage completion of screening. 
@@ -409,7 +413,7 @@ To help mitigate the missing data problem, all variables with more than 13.5% mi
 ## Analysis
 First, the data was examined descriptively. Next, principal component analysis (PCA) was performed using the six numeric variables which describe daily diet. Based on an assessment of scree plots of variances and the proportion of variance explained (PVE), it was determined that an assessment using four leading principal components (PCs) would be sufficient. Principal components were visually examined through the generation of biplots and the PCs were further explored through interpretation of the loadings. K-means clustering was then performed using the 12 numeric variables in the dataset. We first performed PCA and used 8 PCs for further analysis based on the summary table and the scree plot of PVE. To determine the number of clusters, we calculated the total within-cluster sum of square (WSS).
 
-To generate the best predictive model, we created models using LASSO, random forest, and neural network then compared the performance of the models. To achieve this, the data was split into training, testing an validation sets using a 60%-20%-20% split. For LASSO, we performed cross-validation across 10 folds, then used lambda.1se to select the most important variables. We then performed backwards selection to further reduce the number of variables. Next, we generated a random forest model setting mtry=10 and the number of trees to 250. 
+To generate the best predictive model, we created models using LASSO, random forest, and neural network then compared the performance of the models. To achieve this, the data was split into training, testing an validation sets using a 60%-20%-20% split. For LASSO, we performed cross-validation across 10 folds, then used lambda.1se to select the most important variables. We then performed backwards selection to further reduce the number of variables. Next, we generated a random forest model setting mtry=10 and the number of trees to 250. We also generated a neural network, including 2 hidden layers with 20 and 2 neurons, using Relu and softmax. Finally, we took the average predicted values from all three models to create an ensemble model. The final model was selected using misclassification error as the decision criterion.
 
 # Results
 ## Descriptive Statistics
@@ -669,8 +673,7 @@ data.frame(x = pca_all$x[,1],
 ```
 
 ## LASSO
-
-We chose 55 variables from the full data, and we want to find the most important factors that relate to `DIABETESYN` and build a best possible linear prediction equation to predict `DIABETESYN`. Since most variables are factors, we created dummy variables for each level so that we now have 116 variables. We first ran a linear model with all of the variables, and we can see that we cannot estimate all the coefficients as variables such as `ARTHLIMITNo arthritis` and `ARTHWORKNo arthritis` have `NA` as their coefficient. 
+First, we separated the data into training, testing, and validation sets using a 60%-20%-20% split, resulting in 152,210, 50,736, and 50,738 observations per data set, respectively. Based on our plot, we used `lambda.1se` to narrow down the number of predictors. We then used backward selection to narrow down the number of predictors even further to 15: DIABETESYN, SEX, BADPHYSDAYS, CHECKUP, BPHIGH, HIGHCHOL, CHDMI, KIDNEY, BMICAT, WALKDIFF, WRKOUTGUIDELINE, ESTVO2MAX, PNEUVAC, RACE, and DRNKPERMONTH. The testing error for our model is 1, and the area under the curve is 0.82.
 
 ```{r select variables for lasso, echo=FALSE,results='hide',message=FALSE}
 ncol(diabetes)
@@ -706,8 +709,9 @@ dim(Y)
 colnames(X)
 ```
 
-```{r fit.lambda, echo=FALSE,results='hide',message=FALSE}
+```{r fit.lambda, echo=FALSE,results='hide',message=FALSE, eval=FALSE}
 set.seed(1)
+
 fit.lambda <- cv.glmnet(X, as.numeric(Y), alpha=1, nfolds=10) 
 fit.lambda$lambda.min
 fit.lambda$lambda.1se
@@ -717,7 +721,9 @@ coef.1se <- coef(fit.lambda, s="lambda.1se")
 coef.1se <- coef.1se[which(coef.1se !=0),]  
 var.1se <- rownames(as.matrix(coef.1se))[-1]
 var.1se
+```
 
+```{r lasso fit}
 data_lasso_sub <- diabetes[ ,c("DIABETESYN", "state_abbr", "SEX", "BADPHYSDAYS", "PERSDOC", "CHECKUP", "BPHIGH", "HIGHCHOL", "CHDMI", "STROKE", "SKINCANCER", "KIDNEY", "ARTHRITIS", "EDU", "HOME", "EMPLOY", "CHILD", "INCOME", "BMICAT", "DEAFNESS", "BLINDNESS", "WALKDIFF", "SMOKE", "BINGEALC", "HEAVYALC", "EXERCISE", "WRKOUTGUIDELINE", "ESTVO2MAX", "DAILYFTJUICE", "DAILYPOTATO", "FLUSHOT", "TETANUS", "PNEUVAC", "HIVTEST", "RACE", "DRNKPERMONTH")]
 dim(data_lasso_sub)
 
@@ -725,9 +731,7 @@ fit1 <- glm(DIABETESYN ~ ., data=data_lasso_sub, family = binomial)
 
 ```
 
-Based on **Figure 11**, we used `lambda.1se` to narrow down the number of predictors. We then used backward selection to narrow down the number of predictors even further to 15. In the first reduced lasso model, the 12 most significant predictors for `DIABETESYN` are: "SEX", "BADPHYSDAYS", "CHECKUP", "BPHIGH", "HIGHCHOL", "CHDMI", "KIDNEY", "BMICAT", "WALKDIFF", "ESTVO2MAX", "PNEUVAC", "RACE".
-
-```{r lambda plots, echo=FALSE}
+```{r lambda plots, echo=FALSE, eval=FALSE}
 plot(fit.lambda)
 plot(fit.lambda$lambda, 
      main = "Figure 11: There are 80 lambda used", 
@@ -757,12 +761,13 @@ data.train.lasso <- data.train[,c("DIABETESYN", "SEX", "BADPHYSDAYS", "CHECKUP",
 fit.lasso <- glm(DIABETESYN ~ ., family=binomial, data=data.train.lasso)
 
 predict.lasso <- predict(fit1.final, data.test, type="response")
+testerror.lasso <- mean(data.test$DIABETESYN != predict.lasso)
 fit.lasso.roc <- roc(data.test$DIABETESYN, predict.lasso)
 ```
 
 
 ## Random Forest
-The error for our random forest appeared to stabilize around 250 trees, which is what was used to generate the random forest. The area under the curve for the random forest is 0.825, slightly better than that of the LASSO model. Testing error is somewhat high, at 0.987.
+The error for our random forest appeared to stabilize around 250 trees, which is what was used to generate the random forest. The area under the curve for the random forest is 0.825, slightly better than that of the LASSO model. Testing error is somewhat high, at 0.987, although also still slightly better than the LASSO model.
 ```{r random forest, results='markup'}
 set.seed(12345)
 fit.rf <- randomForest(y = data.train[, 1], x = data.train[ , 2:58], mtry=10, ntree=250)
@@ -776,18 +781,25 @@ rf.test.err <- mean(data.test$DIABETESYN != predict.rf)
 fit.rf.roc <- roc(data.test$DIABETESYN, predict.rf[,2])
 ```
 ## Neural Network
+We created a neural network which included two hidden layers with 20 and 10 neurons. First, we tuned the number of epochs. The loss seemed to flatten around epoch 20, so that is the number that was used for the model (see below **figure**). The accuracy for the model was 85.7%, which equates to a misclassification error of 14.3%.
 
-```{r neural network, message=FALSE}
-set.seed(12345)
+```{r neural network creation , message=FALSE}
+diabetes2 <- read.csv("encodetest.csv")
 
-data_xtrain <- data.train[-1]   
-data_ytrain <- data.train[ 1]   
+set_random_seed(12345)
+data.train.nn <- diabetes2[idx_train,]
+data.test.nn <- diabetes2[idx_test,]
+data.val.nn <- diabetes2[idx_val,]
+
+data_xtrain <- data.train.nn[-1]   
+data_ytrain <- data.train.nn[ 1]   
 data_xtrain <- as.matrix(data_xtrain)
 data_ytrain <- as.matrix(data_ytrain)
 
 p <- dim(data_xtrain)[2] # number of input variables
 model <- keras_model_sequential() %>%
   layer_dense(units = 20, activation = "relu", input_shape = c(p)) %>% 
+  layer_dense(units = 10, activation = "relu") %>%  
   layer_dense(units = 2, activation = "softmax")
 print(model)
 
@@ -800,17 +812,69 @@ model %>% compile(
 fit.nn <- model %>% fit(
   data_xtrain,
   data_ytrain,
-  epochs = 20, 
+  epochs = 50, 
   batch_size = 512,
   validation_split = .15
 )
+
 plot(fit.nn)
 
 ```
 
+```{r neural network prediction}
+set_random_seed(12345)
+
+data_xtest <- data.test.nn[-1]
+data_ytest <- data.test.nn[1]   
+data_xtest <- as.matrix(data_xtest)
+data_ytest <- as.matrix(data_ytest)
+
+p <- dim(data_xtrain)[2]
+
+model <- keras_model_sequential() %>%
+  layer_dense(units = 20, activation = "relu", input_shape = c(p)) %>% 
+  layer_dense(units = 10, activation = "relu") %>% 
+  layer_dense(units = 2, activation = "softmax")
+
+model %>% compile(
+  optimizer = "rmsprop",
+  loss = "sparse_categorical_crossentropy",
+  metrics = c("accuracy")
+)
+
+model %>% fit(data_xtrain, data_ytrain, epochs = 20, batch_size = 512)
+
+results <- model %>% evaluate(data_xtest, data_ytest)
+results
+
+variable_mtx <- as.matrix(data.test.nn[,-1])
+nn_pred <- model %>% predict(variable_mtx)
+nn_pred <- nn_pred[,2]
+
+```
+
+## Ensemble Model
+Finally, we created an ensemble model by taking the average prediction of all three models. This resulted in a final validation error of 12.3%, the best of all models created.
+```{r ensemble}
+variable_mtx <- as.matrix(data.val.nn[,-1])
+lasso_pred <- predict(fit1.final, data.val, type="response")
+nn_pred <- model %>% predict(variable_mtx)
+nn_pred <- nn_pred[,2]
+rf_pred <- predict(fit.rf, newdata=data.val, type="prob")[,2]
+
+#Take average of 3 models
+fit.em <- (lasso_pred + rf_pred + nn_pred) / 3
+predict.em.y <- ifelse(fit.em > 0.5, 1, 0)
+em.val.err <- mean(data.val$DIABETESYN != predict.em.y)
+em.val.err
+```
 
 # Conclusion
+Using the methods described above, we were able to successfully create a model which predicted diabetes using survey data with an error of 12.3%. With further refinement, a similar model such as ours could be used as an online diabetes screener. This low-effort, low-stress method of screening for potential diabetes could be used by individuals at home, and those who are likely to have diabetes would be referred to their clinician for testing. This may take some of the burden and fear away from patients, ideally funneling those who most need screening into appropriate testing centers.
 
+Unfortunately, our model is subject to limitations. First, we used single imputation for missing data rather than multiple imputation, which has the potential to be more accurate. Second, the analysis is based on survey data which is subject to recall and social desirability bias. In some ways, this matters less than in other contexts because the end goal was to develop a model which could be used to process future survey data. However, if the data that the model was built upon was inaccurate then the model itself would be as well. In addition, many questions in this survey involve asking the respondent whether a doctor has ever told them that they have a certain medical condition. We could expect that individuals who have recently been diagnosed with, for example, heart disease, would also have been tested for diabetes. In this way, the model assumes, to an extent, that the individual must be aware of their health status for many conditions except for diabetes. However, it should be noted that the original data set included options for "not sure" and these were built into the model. Finally, the cutoff threshold that we used in this project was 0.5, meaning that anyone with a predicted value above this threshold was predicted ot have diabetes and anyone below was predicted not to have diabetes. Future projects should assess this threshold to determine if something other than 0.5 would be better in practice. This is a key consideration, as there are clear health risks associated with false negatives but potential mental harm could result from false positives.
+
+Ultimately, a tool such as this has promise as a low-intensity health screener, but would need additional refinement and testing before being released to the public.
 
 # References
 1. Centers for Disease Control and Prevention. National Diabetes Statistics Report website. https://www.cdc.gov/diabetes/data/statistics-report/index.html. Accessed April 16, 2023.
